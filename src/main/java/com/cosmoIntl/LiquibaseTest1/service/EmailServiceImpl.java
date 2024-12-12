@@ -1,6 +1,9 @@
 package com.cosmoIntl.LiquibaseTest1.service;
 
+import com.cosmoIntl.LiquibaseTest1.dto.requestDTO.EmailRequestDto;
+import com.cosmoIntl.LiquibaseTest1.dto.responseDTO.EmailResponseDTO;
 import com.cosmoIntl.LiquibaseTest1.entity.EmailDetail;
+import com.cosmoIntl.LiquibaseTest1.mapper.EmailMapper;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 
@@ -20,13 +23,16 @@ import java.io.File;
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
+    private final EmailMapper emailMapper;
 
     @Value("${spring.mail.username}")
     private String sender;
 
-    public String sendSimpleMail(EmailDetail emailDetail) {
+    public EmailResponseDTO sendSimpleMail(EmailRequestDto emailRequestDto) {
 
+        EmailDetail emailDetail = emailMapper.toEmailDetail(emailRequestDto);
         SimpleMailMessage mailMessage = new SimpleMailMessage();
+        EmailResponseDTO emailResponseDTO = new EmailResponseDTO();
         try {
             mailMessage.setFrom(sender);
             mailMessage.setTo(emailDetail.getRecipient());
@@ -34,31 +40,39 @@ public class EmailServiceImpl implements EmailService {
             mailMessage.setText(emailDetail.getMsgBody());
 
             javaMailSender.send(mailMessage);
-            return "Message sent successfully";
-        }catch (Exception e){
+            emailResponseDTO.setMessage("Message sent successfully");
+            return emailResponseDTO;
+        } catch (Exception e) {
             log.info("Error sending email: {}", e.getMessage());
-            return e.getMessage();
+            emailResponseDTO.setMessage(e.getMessage());
+            return emailResponseDTO;
         }
     }
 
-    public String sendMailWithAttachment(EmailDetail emailDetail) {
+    public EmailResponseDTO sendMailWithAttachment(EmailRequestDto emailRequestDto) {
+
+        EmailDetail emailDetail = emailMapper.toEmailDetail(emailRequestDto);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper;
+        EmailResponseDTO emailResponseDTO = new EmailResponseDTO();
 
         try {
-        mimeMessageHelper = new MimeMessageHelper(mimeMessage);
-        mimeMessageHelper.setFrom(sender);
-        mimeMessageHelper.setTo(emailDetail.getRecipient());
-        mimeMessageHelper.setSubject(emailDetail.getSubject());
-        mimeMessageHelper.setText(emailDetail.getMsgBody());
+            mimeMessageHelper = new MimeMessageHelper(mimeMessage,true);
+            mimeMessageHelper.setFrom(sender);
+            mimeMessageHelper.setTo(emailDetail.getRecipient());
+            mimeMessageHelper.setSubject(emailDetail.getSubject());
+            mimeMessageHelper.setText(emailDetail.getMsgBody());
 
-        FileSystemResource file = new FileSystemResource(new File(emailDetail.getAttachment()));
+            FileSystemResource file = new FileSystemResource(new File(emailDetail.getAttachment()));
 
-        mimeMessageHelper.addAttachment(file.getFilename(), file);
-        javaMailSender.send(mimeMessage);
-        return "Message sent successfully with attachment";
+            mimeMessageHelper.addAttachment(file.getFilename(), file);
+            javaMailSender.send(mimeMessage);
+            emailResponseDTO.setMessage("Message sent successfully with attachment");
+            return emailResponseDTO;
 
-    }catch(Exception e) {
-        return e.getMessage();}
+        } catch (Exception e) {
+            emailResponseDTO.setMessage(e.getMessage());
+            return emailResponseDTO;
+        }
     }
 }

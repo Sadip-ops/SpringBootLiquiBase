@@ -1,5 +1,7 @@
 package com.cosmoIntl.LiquibaseTest1.controller;
 
+import com.cosmoIntl.LiquibaseTest1.dto.requestDTO.EmailRequestDto;
+import com.cosmoIntl.LiquibaseTest1.dto.responseDTO.EmailResponseDTO;
 import com.cosmoIntl.LiquibaseTest1.entity.EmailDetail;
 import com.cosmoIntl.LiquibaseTest1.service.EmailService;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +20,15 @@ public class EmailController {
     private  EmailService emailService;
 
     @PostMapping("/sendSimpleMail")
-    public ResponseEntity<String> sendSimpleMail(@RequestBody EmailDetail emailDetail) {
-    String response=emailService.sendSimpleMail(emailDetail);
+    public ResponseEntity<EmailResponseDTO> sendSimpleMail(@RequestBody EmailRequestDto emailRequestDto) {
+    EmailResponseDTO response=emailService.sendSimpleMail(emailRequestDto);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/sendMailWithAttachment")
-    public ResponseEntity<String> sendMailWithAttachment(@RequestBody EmailDetail emailDetail) {
+    public ResponseEntity<EmailResponseDTO> sendMailWithAttachment(@RequestBody EmailRequestDto emailRequestDto) {
 
-        String response=emailService.sendMailWithAttachment(emailDetail);
+        EmailResponseDTO response=emailService.sendMailWithAttachment(emailRequestDto);
         return ResponseEntity.ok(response);
 
     }
