@@ -32,4 +32,12 @@ public class EmailController {
         return ResponseEntity.ok(response);
 
     }
+
+    @PostMapping("/sendMailFromTemplate")
+    public ResponseEntity<EmailResponseDTO> sendMailFromTemplate(@RequestBody EmailRequestDto emailRequestDto) {
+
+        EmailResponseDTO response=emailService.sendMailFromTemplate(emailRequestDto);
+        return ResponseEntity.ok(response);
+
+    }
 }

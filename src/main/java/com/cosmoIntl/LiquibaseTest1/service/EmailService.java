@@ -9,4 +9,5 @@ public interface EmailService {
 
     EmailResponseDTO sendSimpleMail(EmailRequestDto emailRequestDto);
     EmailResponseDTO sendMailWithAttachment(EmailRequestDto emailRequestDto);
+    EmailResponseDTO sendMailFromTemplate(EmailRequestDto emailRequestDto);
 }

@@ -4,6 +4,8 @@ import com.cosmoIntl.LiquibaseTest1.dto.requestDTO.EmailRequestDto;
 import com.cosmoIntl.LiquibaseTest1.dto.responseDTO.EmailResponseDTO;
 import com.cosmoIntl.LiquibaseTest1.entity.EmailDetail;
 import com.cosmoIntl.LiquibaseTest1.mapper.EmailMapper;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 
@@ -14,8 +16,10 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import java.io.File;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -24,6 +28,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
     private final EmailMapper emailMapper;
+    private final Configuration freemarkerConfig;
 
     @Value("${spring.mail.username}")
     private String sender;
@@ -73,6 +78,40 @@ public class EmailServiceImpl implements EmailService {
         } catch (Exception e) {
             emailResponseDTO.setMessage(e.getMessage());
             return emailResponseDTO;
+        }
+    }
+
+    public EmailResponseDTO sendMailFromTemplate(EmailRequestDto emailRequestDto) {
+        EmailDetail emailDetail = emailMapper.toEmailDetail(emailRequestDto);
+        EmailResponseDTO emailResponseDTO = new EmailResponseDTO();
+
+        try {
+            String emailContent = processTemplate(emailRequestDto.getTemplateData(), "emailTemplate.ftlh");
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false);
+
+            helper.setFrom(sender);
+            helper.setTo(emailDetail.getRecipient());
+            helper.setSubject(emailDetail.getSubject());
+            helper.setText(emailContent, true); // Set email content as HTML
+
+            javaMailSender.send(mimeMessage);
+            emailResponseDTO.setMessage("Email sent successfully using FreeMarker template");
+        } catch (Exception e) {
+            log.error("Error while sending email: {}", e.getMessage());
+            emailResponseDTO.setMessage("Failed to send email: " + e.getMessage());
+        }
+
+        return emailResponseDTO;
+    }
+
+    private String processTemplate(Map<String, Object> model, String templateName) {
+        try {
+            Template template = freemarkerConfig.getTemplate(templateName);
+            return FreeMarkerTemplateUtils.processTemplateIntoString(template, model);
+        } catch (Exception e) {
+            log.error("Error processing FreeMarker template: {}", e.getMessage());
+            throw new RuntimeException("Failed to process email template", e);
         }
     }
 }
