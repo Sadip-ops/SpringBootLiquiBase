@@ -40,4 +40,11 @@ public class EmailController {
         return ResponseEntity.ok(response);
 
     }
+
+    @PostMapping("/sendMailFromDbTemplate")
+    public ResponseEntity<EmailResponseDTO> sendMailFromDbTemplate(@RequestBody EmailRequestDto emailRequestDto) {
+        EmailResponseDTO response = emailService.sendMailUsingDbTemplate(emailRequestDto);
+        return ResponseEntity.ok(response);
+    }
+
 }

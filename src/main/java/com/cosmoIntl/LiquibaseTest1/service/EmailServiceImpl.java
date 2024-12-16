@@ -3,7 +3,9 @@ package com.cosmoIntl.LiquibaseTest1.service;
 import com.cosmoIntl.LiquibaseTest1.dto.requestDTO.EmailRequestDto;
 import com.cosmoIntl.LiquibaseTest1.dto.responseDTO.EmailResponseDTO;
 import com.cosmoIntl.LiquibaseTest1.entity.EmailDetail;
+import com.cosmoIntl.LiquibaseTest1.entity.EmailTemplate;
 import com.cosmoIntl.LiquibaseTest1.mapper.EmailMapper;
+import com.cosmoIntl.LiquibaseTest1.repository.EmailTemplateRepository;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import jakarta.mail.internet.MimeMessage;
@@ -29,6 +31,7 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender javaMailSender;
     private final EmailMapper emailMapper;
     private final Configuration freemarkerConfig;
+    private final EmailTemplateRepository emailTemplateRepository;
 
     @Value("${spring.mail.username}")
     private String sender;
@@ -105,6 +108,31 @@ public class EmailServiceImpl implements EmailService {
         return emailResponseDTO;
     }
 
+  public  EmailResponseDTO sendMailUsingDbTemplate(EmailRequestDto emailRequestDto){
+        EmailResponseDTO emailResponseDTO = new EmailResponseDTO();
+
+        try {
+            // Fetch the template content from the database
+            String templateContent = getTemplateContentFromDatabase(emailRequestDto.getSubject()); // Using subject as template name for example
+            String emailContent = processTemplateDb(emailRequestDto.getTemplateData(), templateContent);
+
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false);
+
+            helper.setFrom(sender);
+            helper.setTo(emailRequestDto.getRecipient());
+            helper.setSubject(emailRequestDto.getSubject());
+            helper.setText(emailContent, true); // HTML email
+
+            javaMailSender.send(mimeMessage);
+            emailResponseDTO.setMessage("Email sent successfully using database template");
+        } catch (Exception e) {
+            log.error("Error while sending email: {}", e.getMessage());
+            emailResponseDTO.setMessage("Failed to send email: " + e.getMessage());
+        }
+        return emailResponseDTO;
+    }
+
     private String processTemplate(Map<String, Object> model, String templateName) {
         try {
             Template template = freemarkerConfig.getTemplate(templateName);
@@ -113,5 +141,21 @@ public class EmailServiceImpl implements EmailService {
             log.error("Error processing FreeMarker template: {}", e.getMessage());
             throw new RuntimeException("Failed to process email template", e);
         }
+    }
+
+    private String processTemplateDb(Map<String, Object> model, String templateContent) {
+        try {
+            Template template = new Template("dynamicTemplate", templateContent, freemarkerConfig);
+            return FreeMarkerTemplateUtils.processTemplateIntoString(template, model);
+        } catch (Exception e) {
+            log.error("Error processing FreeMarker template: {}", e.getMessage());
+            throw new RuntimeException("Failed to process email template", e);
+        }
+    }
+
+    private String getTemplateContentFromDatabase(String templateName) {
+        return emailTemplateRepository.findByTemplateName(templateName)
+                .map(EmailTemplate::getTemplateContent)
+                .orElseThrow(() -> new RuntimeException("Template not found: " + templateName));
     }
 }
