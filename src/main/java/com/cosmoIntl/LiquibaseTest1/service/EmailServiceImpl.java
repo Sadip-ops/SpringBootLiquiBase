@@ -36,6 +36,7 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String sender;
 
+    @Override
     public EmailResponseDTO sendSimpleMail(EmailRequestDto emailRequestDto) {
 
         EmailDetail emailDetail = emailMapper.toEmailDetail(emailRequestDto);
@@ -57,6 +58,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
     public EmailResponseDTO sendMailWithAttachment(EmailRequestDto emailRequestDto) {
 
         EmailDetail emailDetail = emailMapper.toEmailDetail(emailRequestDto);
@@ -84,6 +86,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
     public EmailResponseDTO sendMailFromTemplate(EmailRequestDto emailRequestDto) {
         EmailDetail emailDetail = emailMapper.toEmailDetail(emailRequestDto);
         EmailResponseDTO emailResponseDTO = new EmailResponseDTO();
@@ -108,7 +111,8 @@ public class EmailServiceImpl implements EmailService {
         return emailResponseDTO;
     }
 
-  public  EmailResponseDTO sendMailUsingDbTemplate(EmailRequestDto emailRequestDto){
+    @Override
+    public  EmailResponseDTO sendMailUsingDbTemplate(EmailRequestDto emailRequestDto){
         EmailResponseDTO emailResponseDTO = new EmailResponseDTO();
 
         try {

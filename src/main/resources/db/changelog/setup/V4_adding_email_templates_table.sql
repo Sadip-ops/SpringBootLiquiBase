@@ -1,7 +1,7 @@
 --liquibase formatted sql
 
 -- Changeset Sadip_Khadka:1
-CREATE TABLE email_templates (
+CREATE TABLE if not exists email_templates (
                                  id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                  template_name VARCHAR(255) NOT NULL,
                                  template_content TEXT NOT NULL,

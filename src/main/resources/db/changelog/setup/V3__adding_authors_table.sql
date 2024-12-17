@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS AUTHOR (
                                       name VARCHAR(255) NOT NULL
     );
 
--- preconditions: onFail:HALT
+-- preconditions: onFail:CONTINUE
+--    onError:HALT
 --    - and :
 --    - tableExists tableName=author
 --    - tableExists tableName=book
@@ -14,7 +15,8 @@ CREATE TABLE IF NOT EXISTS AUTHOR (
 ALTER TABLE BOOK ADD COLUMN author_id BIGINT;
 
 
--- preconditions: onFail:HALT
+-- preconditions: onFail:CONTINUE
+--    onError:HALT
 --    - and :
 --    - tableExists tableName=author
 --    - tableExists tableName=book
