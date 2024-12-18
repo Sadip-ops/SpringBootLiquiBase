@@ -2,12 +2,14 @@ package com.cosmoIntl.LiquibaseTest1.service;
 
 
 import com.cosmoIntl.LiquibaseTest1.dto.requestDTO.BookRequestDTO;
+import com.cosmoIntl.LiquibaseTest1.dto.responseDTO.ApiResponse;
 import com.cosmoIntl.LiquibaseTest1.dto.responseDTO.BookResponseDTO;
 import com.cosmoIntl.LiquibaseTest1.entity.Author;
 import com.cosmoIntl.LiquibaseTest1.entity.Book;
 import com.cosmoIntl.LiquibaseTest1.repository.AuthorRepository;
 import com.cosmoIntl.LiquibaseTest1.repository.BookRepository;
 import com.cosmoIntl.LiquibaseTest1.util.FileUtility;
+import com.cosmoIntl.LiquibaseTest1.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +28,7 @@ public class BookServiceImpl implements BookService {
     private static final String EXTERNAL_DIRECTORY = "D:/CosmoIntl Intern Period ko Kaam Haru/2024-12-09/images"; // Example external directory path
 
     @Override
-    public BookResponseDTO saveBook(BookRequestDTO requestDTO, MultipartFile file,boolean isExternal) {
+    public ApiResponse<?> saveBook(BookRequestDTO requestDTO, MultipartFile file, boolean isExternal) {
             try {
                 // Save file using FileUtility
 //                String imagePath = FileUtility.saveFile(file, IMAGE_DIRECTORY);
@@ -55,14 +57,10 @@ public class BookServiceImpl implements BookService {
 
                 bookRepository.save(book);
 
+
+
                 // Return a response DTO
-                return new BookResponseDTO(
-                        book.getId(),
-                        book.getTitle(),
-                        book.getGenre(),
-                        author != null ? author.getName() : null,
-                        book.getImageUrl()
-                );
+                return ResponseUtil.getSuccessResponse("Book saved successfully.");
             } catch (IOException e) {
                 throw new RuntimeException("Error while saving file: " + e.getMessage());
             }

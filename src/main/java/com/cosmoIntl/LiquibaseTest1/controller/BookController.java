@@ -2,6 +2,7 @@ package com.cosmoIntl.LiquibaseTest1.controller;
 
 
 import com.cosmoIntl.LiquibaseTest1.dto.requestDTO.BookRequestDTO;
+import com.cosmoIntl.LiquibaseTest1.dto.responseDTO.ApiResponse;
 import com.cosmoIntl.LiquibaseTest1.dto.responseDTO.BookResponseDTO;
 import com.cosmoIntl.LiquibaseTest1.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,18 +18,17 @@ public class BookController {
     private BookService bookService;
 
     @PostMapping("/create")
-    public ResponseEntity<BookResponseDTO> saveBook(@RequestPart("book") BookRequestDTO bookRequestDTO,
-                                                    @RequestPart("file") MultipartFile file) {
+    public ApiResponse<?> saveBook(@RequestPart("book") BookRequestDTO bookRequestDTO,
+                                                                @RequestPart("file") MultipartFile file) {
 
-        BookResponseDTO responseDTO = bookService.saveBook(bookRequestDTO, file,false);
-        return ResponseEntity.ok().body(responseDTO);
+        return bookService.saveBook(bookRequestDTO, file, false);
     }
 
-    @PostMapping("/create-external")
-    public ResponseEntity<BookResponseDTO> saveBookExternal(@RequestPart("book") BookRequestDTO bookRequestDTO,
-                                                            @RequestPart("file") MultipartFile file) {
-
-        BookResponseDTO responseDTO = bookService.saveBook(bookRequestDTO, file, true);
-        return ResponseEntity.ok().body(responseDTO);
-    }
+//    @PostMapping("/create-external")
+//    public ResponseEntity<BookResponseDTO> saveBookExternal(@RequestPart("book") BookRequestDTO bookRequestDTO,
+//                                                            @RequestPart("file") MultipartFile file) {
+//
+//        BookResponseDTO responseDTO = bookService.saveBook(bookRequestDTO, file, true);
+//        return ResponseEntity.ok().body(responseDTO);
+//    }
 }
