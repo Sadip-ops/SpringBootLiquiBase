@@ -7,6 +7,7 @@ import com.cosmoIntl.LiquibaseTest1.dto.responseDTO.BookResponseDTO;
 import com.cosmoIntl.LiquibaseTest1.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +18,7 @@ public class BookController {
     @Autowired
     private BookService bookService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     @PostMapping("/create")
     public ApiResponse<?> saveBook(@RequestPart("book") BookRequestDTO bookRequestDTO,
                                                                 @RequestPart("file") MultipartFile file) {
